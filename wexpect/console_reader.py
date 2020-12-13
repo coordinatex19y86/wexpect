@@ -219,12 +219,10 @@ class ConsoleReaderBase:
 
         if len(s) == 0:
             return 0
+        elif not self.consout:
+            return ""
         elif s[-1] == '\n':
             s = s[:-1]
-            
-        records = [self.createKeyEvent(c) for c in str(s)]
-        if not self.consout:
-            return ""
 
         # Store the current cursor position to hide characters in local echo disabled mode
         # (workaround).
@@ -232,6 +230,7 @@ class ConsoleReaderBase:
         startCo = consinfo['CursorPosition']
 
         # Send the string to console input
+        records = [self.createKeyEvent(c) for c in str(s)]
         wrote = self.consin.WriteConsoleInput(records)
 
         # Wait until all input has been recorded by the console.
