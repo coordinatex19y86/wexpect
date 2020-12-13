@@ -374,7 +374,8 @@ class ConsoleReaderBase:
         logger.spam('isSameY: %r' % isSameY)
         logger.spam('isSamePos: %r' % isSamePos)
 
-        if isSameY or not self.lastReadData.endswith('\r\n'):
+        notendswith = not self.lastReadData.endswith('\r\n')
+        if isSameY or notendswith:
             # Read the current slice again
             self.totalRead -= self.lastRead
             self.__currentReadCo.X = 0
@@ -409,7 +410,8 @@ class ConsoleReaderBase:
             lastReadData = self.lastReadData
             pos = self.getOffset(self.__currentReadCo)
             self.lastReadData = s
-            if isSameY or not lastReadData.endswith('\r\n'):
+            notendswith = not lastReadData.endswith('\r\n')
+            if isSameY or notendswith:
                 # Detect changed lines
                 self.__buffer.seek(pos)
                 buf = self.__buffer.read()
