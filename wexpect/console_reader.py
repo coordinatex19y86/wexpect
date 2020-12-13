@@ -221,7 +221,7 @@ class ConsoleReaderBase:
             return 0
         elif not self.consout:
             return ""
-        elif s[-1] == '\n':
+        if s[-1] == '\n':
             s = s[:-1]
 
         # Store the current cursor position to hide characters in local echo disabled mode
