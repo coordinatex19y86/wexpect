@@ -219,8 +219,9 @@ class ConsoleReaderBase:
 
         if len(s) == 0:
             return 0
-        if s[-1] == '\n':
+        elif s[-1] == '\n':
             s = s[:-1]
+            
         records = [self.createKeyEvent(c) for c in str(s)]
         if not self.consout:
             return ""
