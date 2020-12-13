@@ -16,6 +16,7 @@ import logging
 import signal
 import string
 import random
+import argparse
 
 # platform does not define VEOF so assume CTRL-D
 EOF_CHAR = b'\x04'

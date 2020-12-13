@@ -942,7 +942,7 @@ class SpawnPipe(SpawnBase):
             s = win32file.ReadFile(self.pipe, size)[1]
 
             if s:
-                logger.debug(f'Readed: {s}')
+                logger.debug(f'Readed: {s.decode()}')
             else:
                 logger.spam(f'Readed: {s}')
 
