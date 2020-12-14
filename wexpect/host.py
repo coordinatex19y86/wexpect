@@ -221,16 +221,12 @@ class SpawnBase:
             raise TypeError('The argument, args, must be a list.')
 
         if args == []:
-            print('1111111111111111111\n')
             self.args = split_command_line(command)
             self.command = self.args[0]
         else:
-            print('222222222222222222\n')
             self.command = command
             self.args = args[:]     # work with a copy
             self.args.insert(0, command)
-        print("ddddddddddddddd\n")
-        print(self.args)
         command_with_path = shutil.which(self.command)
         if command_with_path is None:
             logger.warning('The command was not found or was not executable: %s.' % self.command)
@@ -243,7 +239,6 @@ class SpawnBase:
 
         self.terminated = False
         self.closed = False
-        print(self.args)
         self.child_fd = self.startChild(self.args, self.env)
         self.get_child_process()
         logger.info(f'Child pid: {self.child_pid}  Console pid: {self.console_pid}')
