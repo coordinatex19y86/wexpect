@@ -36,7 +36,7 @@ else:
     from .console_reader import ConsoleReaderSocket
     from .console_reader import ConsoleReaderPipe
 
-    from .host import SpawnSocket
+    # from .host import SpawnSocket
     from .host import SpawnPipe
     from .host import run
     from .host import searcher_string
