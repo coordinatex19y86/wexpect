@@ -913,9 +913,9 @@ class SpawnPipe(SpawnBase):
                 if res == 0:
                     logger.debug(f"SetNamedPipeHandleState return code: {res}")
                 return
-            except pywintypes.error as e:
-                if e.args[0] != winerror.ERROR_FILE_NOT_FOUND:      # 2
-                    raise
+            except pywintypes.error: # as e:
+                # if e.args[0] != winerror.ERROR_FILE_NOT_FOUND:      # 2
+                #     raise
                 logger.debug("no pipe, trying again in a bit later")
                 time.sleep(0.25)
 
