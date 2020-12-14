@@ -240,12 +240,11 @@ class SpawnBase:
 
         self.terminated = False
         self.closed = False
-
+        print(self.args)
         self.child_fd = self.startChild(self.args, self.env)
         self.get_child_process()
         logger.info(f'Child pid: {self.child_pid}  Console pid: {self.console_pid}')
         self.connect_to_child()
-        print("..................................2.........................\n")
 
     def __del__(self):
         """This makes sure that no system resources are left open. Python only
@@ -891,8 +890,6 @@ class SpawnPipe(SpawnBase):
             end_time = time.time() + timeout
 
         pipe_full_path = r'\\.\pipe\{}'.format(self.pipe_file_name)
-        print("..................................1.........................\n")
-        print(f"..................................{end_time}.........................\n")
         logger.debug(f'Trying to connect to pipe: {pipe_full_path}')
         while True:
             if end_time < time.time():
@@ -913,12 +910,11 @@ class SpawnPipe(SpawnBase):
                 if res == 0:
                     logger.debug(f"SetNamedPipeHandleState return code: {res}")
                 return
-            except pywintypes.error: # as e:
-                # if e.args[0] != winerror.ERROR_FILE_NOT_FOUND:      # 2
-                #     raise
+            except pywintypes.error as e:
+                if e.args[0] != winerror.ERROR_FILE_NOT_FOUND:      # 2
+                    raise
                 logger.debug("no pipe, trying again in a bit later")
-                time.sleep(0.25)
-
+                time.sleep(0.2)
 
     def disconnect_from_child(self):
         if self.pipe:
@@ -995,91 +991,91 @@ class SpawnPipe(SpawnBase):
         return len(s)
 
 
-# class SpawnSocket(SpawnBase):
+class SpawnSocket(SpawnBase):
 
-#     def __init__(self, command, args=[], timeout=30, maxread=60000, searchwindowsize=None,
-#                  logfile=None, cwd=None, env=None, codepage=None, echo=True, port=4321,
-#                  host='127.0.0.1', interact=False, **kwargs):
-#         self.port = port
-#         self.host = host
-#         self.sock = None
-#         self.console_class_name = 'ConsoleReaderSocket'
-#         self.console_class_parameters = {'port': port}
+    def __init__(self, command, args=[], timeout=30, maxread=60000, searchwindowsize=None,
+                 logfile=None, cwd=None, env=None, codepage=None, echo=True, port=4321,
+                 host='127.0.0.1', interact=False, **kwargs):
+        self.port = port
+        self.host = host
+        self.sock = None
+        self.console_class_name = 'ConsoleReaderSocket'
+        self.console_class_parameters = {'port': port}
 
-#         super().__init__(
-#             command=command, args=args, timeout=timeout, maxread=maxread,
-#             searchwindowsize=searchwindowsize, cwd=cwd, env=env, codepage=codepage, echo=echo,
-#             interact=interact, **kwargs)
+        super().__init__(
+            command=command, args=args, timeout=timeout, maxread=maxread,
+            searchwindowsize=searchwindowsize, cwd=cwd, env=env, codepage=codepage, echo=echo,
+            interact=interact, **kwargs)
 
-#         # Sets delay in terminate() method to allow kernel time to update process status. Time in
-#         # seconds.
-#         self.delayafterterminate = 2
+        # Sets delay in terminate() method to allow kernel time to update process status. Time in
+        # seconds.
+        self.delayafterterminate = 2
 
-#     def _send_impl(self, s):
-#         """This sends a string to the child process. This returns the number of
-#         bytes written. If a log file was set then the data is also written to
-#         the log. """
-#         if isinstance(s, str):
-#             s = str.encode(s)
-#         try:
-#             if s:
-#                 logger.debug(f"Writing: {s}")
-#             self.sock.sendall(s)
-#             logger.spam(f"WriteFile finished.")
-#             return len(s)
-#         except ConnectionResetError as e:
-#             logger.info("ConnectionResetError")
-#             self.flag_eof = True
-#             raise EOF("ConnectionResetError")
+    def _send_impl(self, s):
+        """This sends a string to the child process. This returns the number of
+        bytes written. If a log file was set then the data is also written to
+        the log. """
+        if isinstance(s, str):
+            s = str.encode(s)
+        try:
+            if s:
+                logger.debug(f"Writing: {s}")
+            self.sock.sendall(s)
+            logger.spam(f"WriteFile finished.")
+            return len(s)
+        except ConnectionResetError as e:
+            logger.info("ConnectionResetError")
+            self.flag_eof = True
+            raise EOF("ConnectionResetError")
 
-#     def connect_to_child(self):
-#         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-#         self.sock.connect((self.host, self.port))
-#         self.sock.settimeout(.2)
+    def connect_to_child(self):
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.connect((self.host, self.port))
+        self.sock.settimeout(.2)
 
-#     def disconnect_from_child(self):
-#         logger.info('disconnect_from_child')
-#         if self.sock:
-#             self.sock.shutdown(socket.SHUT_RDWR)
-#             self.sock.close()
-#             self.sock = None
+    def disconnect_from_child(self):
+        logger.info('disconnect_from_child')
+        if self.sock:
+            self.sock.shutdown(socket.SHUT_RDWR)
+            self.sock.close()
+            self.sock = None
 
-#     def read_nonblocking(self, size=1):
-#         """This reads at most size characters from the child application. If
-#         the end of file is read then an EOF exception will be raised.
+    def read_nonblocking(self, size=1):
+        """This reads at most size characters from the child application. If
+        the end of file is read then an EOF exception will be raised.
 
-#         This is not effected by the 'size' parameter, so if you call
-#         read_nonblocking(size=100, timeout=30) and only one character is
-#         available right away then one character will be returned immediately.
-#         It will not wait for 30 seconds for another 99 characters to come in.
+        This is not effected by the 'size' parameter, so if you call
+        read_nonblocking(size=100, timeout=30) and only one character is
+        available right away then one character will be returned immediately.
+        It will not wait for 30 seconds for another 99 characters to come in.
 
-#         This is a wrapper around Wtty.read(). """
+        This is a wrapper around Wtty.read(). """
 
-#         if self.closed:
-#             logger.info('I/O operation on closed file in read_nonblocking().')
-#             raise ValueError('I/O operation on closed file in read_nonblocking().')
+        if self.closed:
+            logger.info('I/O operation on closed file in read_nonblocking().')
+            raise ValueError('I/O operation on closed file in read_nonblocking().')
 
-#         try:
-#             s = self.sock.recv(size)
+        try:
+            s = self.sock.recv(size)
 
-#             if s:
-#                 logger.debug(f'Readed: {s}')
-#             else:
-#                 logger.spam(f'Readed: {s}')
+            if s:
+                logger.debug(f'Readed: {s}')
+            else:
+                logger.spam(f'Readed: {s}')
 
-#             if EOF_CHAR in s:
-#                 self.flag_eof = True
-#                 logger.info("EOF: EOF character has been arrived")
-#                 s = s.split(EOF_CHAR)[0]
+            if EOF_CHAR in s:
+                self.flag_eof = True
+                logger.info("EOF: EOF character has been arrived")
+                s = s.split(EOF_CHAR)[0]
 
-#         except ConnectionResetError:
-#             self.flag_eof = True
-#             logger.info("EOF('ConnectionResetError')")
-#             raise EOF('ConnectionResetError')
-#         except socket.timeout:
-#             return ''
+        except ConnectionResetError:
+            self.flag_eof = True
+            logger.info("EOF('ConnectionResetError')")
+            raise EOF('ConnectionResetError')
+        except socket.timeout:
+            return ''
 
-#         return s.decode()
+        return s.decode()
 
 
 class searcher_re (object):
