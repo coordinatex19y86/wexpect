@@ -216,8 +216,7 @@ class SpawnBase:
                 'Command is an int type. If this is a file descriptor then maybe you want to use'
                 ' fdpexpect.fdspawn which takes an existing file descriptor instead of a command '
                 'string.')
-
-        if not isinstance(args, list):
+        elif not isinstance(args, list):
             logger.warning("TypeError ('The argument, args, must be a list.')")
             raise TypeError('The argument, args, must be a list.')
 
@@ -225,9 +224,9 @@ class SpawnBase:
             self.args = split_command_line(command)
             self.command = self.args[0]
         else:
+            self.command = command
             self.args = args[:]     # work with a copy
             self.args.insert(0, command)
-            self.command = command
 
         command_with_path = shutil.which(self.command)
         if command_with_path is None:
