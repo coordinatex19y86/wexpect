@@ -328,61 +328,61 @@ class SpawnBase:
         # Deep copy needed to prevent cycle-to-cycle growth. See #31 for more details.
         environ = os.environ.copy()
 
-        if getattr(sys, 'frozen', False): # pragma: no cover
-            '''Runing in a PyInstaller bundle:
-            Pyinstaller has no explicit python interpreter, so console-reader should be bundled
-            also, and host should call it as a windows executable.
+        # if getattr(sys, 'frozen', False): # pragma: no cover
+        #     '''Runing in a PyInstaller bundle:
+        #     Pyinstaller has no explicit python interpreter, so console-reader should be bundled
+        #     also, and host should call it as a windows executable.
 
-            This code cannot be covered during tests, because it runs only in bundled way.
+        #     This code cannot be covered during tests, because it runs only in bundled way.
 
-            https://pyinstaller.readthedocs.io/en/stable/runtime-information.html#using-sys-executable-and-sys-argv-0
-            https://github.com/pyinstaller/pyinstaller/issues/822
-            '''
+        #     https://pyinstaller.readthedocs.io/en/stable/runtime-information.html#using-sys-executable-and-sys-argv-0
+        #     https://github.com/pyinstaller/pyinstaller/issues/822
+        #     '''
 
-            if not hasattr(sys, '_MEIPASS'):
-                raise Exception(
-                    '`sys.frozen` found, but `sys._MEIPASS` not. Only pyinstaller is supported.'
-                )
+        #     if not hasattr(sys, '_MEIPASS'):
+        #         raise Exception(
+        #             '`sys.frozen` found, but `sys._MEIPASS` not. Only pyinstaller is supported.'
+        #         )
 
-            #
-            # Find wexpect executable (aka. console reader executable).
-            # User can point WEXPECT_EXECUTABLE environment variable to this executable, if this
-            # env/var isn't specified we will find executable `../wexpect/wexpect.exe` relativly
-            # from the host executable.
-            #
-            try:
-                wexpect_executable = os.environ['WEXPECT_EXECUTABLE']
-            except KeyError:
-                dirname = os.path.dirname(sys.executable)
-                wexpect_executable = os.path.join(dirname, '..', 'wexpect', 'wexpect.exe')
+        #
+        # Find wexpect executable (aka. console reader executable).
+        # User can point WEXPECT_EXECUTABLE environment variable to this executable, if this
+        # env/var isn't specified we will find executable `../wexpect/wexpect.exe` relativly
+        # from the host executable.
+        #
+        try:
+            wexpect_executable = os.environ['WEXPECT_EXECUTABLE']
+        except KeyError:
+            dirname = os.path.dirname(sys.executable)
+            wexpect_executable = os.path.join(dirname, '..', 'wexpect', 'wexpect.exe')
 
-            if not os.path.exists(wexpect_executable):
-                logger.error(f'ExceptionPexpect: Wexpect executable: >>{wexpect_executable}<< not found.')
-                raise ExceptionPexpect(f'Wexpect executable: >>{wexpect_executable}<< not found.')
+        if not os.path.exists(wexpect_executable):
+            logger.error(f'ExceptionPexpect: Wexpect executable: >>{wexpect_executable}<< not found.')
+            raise ExceptionPexpect(f'Wexpect executable: >>{wexpect_executable}<< not found.')
 
-            commandLine = f'"{wexpect_executable}" {console_args}'
+        commandLine = f'"{wexpect_executable}" {console_args}'
 
-        else:
-            '''Runing in a normal python process
-            '''
-            dirname = os.path.dirname(os.path.abspath(__file__))
-            spath = [os.path.dirname(dirname)]
+        # else:
+        #     '''Runing in a normal python process
+        #     '''
+        #     dirname = os.path.dirname(os.path.abspath(__file__))
+        #     spath = [os.path.dirname(dirname)]
 
-            pyargs = ['-m']
-            python_executable = sys.executable
+        #     pyargs = ['-m']
+        #     python_executable = sys.executable
 
-            if self.coverage_console_reader:
-                pyargs = ['-m', 'coverage', 'run', '--parallel-mode', '-m']
+        #     if self.coverage_console_reader:
+        #         pyargs = ['-m', 'coverage', 'run', '--parallel-mode', '-m']
 
-            # add current location to PYTHONPATH environment variable to be able to start the child.
-            python_path = environ.get('PYTHONPATH', '')
-            spath = ';'.join(spath)
-            environ['PYTHONPATH'] = f'{spath};{python_path}'
+        #     # add current location to PYTHONPATH environment variable to be able to start the child.
+        #     python_path = environ.get('PYTHONPATH', '')
+        #     spath = ';'.join(spath)
+        #     environ['PYTHONPATH'] = f'{spath};{python_path}'
 
-            child_class_initializator = f"wexpect {console_args}"
+        #     child_class_initializator = f"wexpect {console_args}"
 
-            pyargs = ' '.join(pyargs)
-            commandLine = f'"{python_executable}" {pyargs} {child_class_initializator}'
+        #     pyargs = ' '.join(pyargs)
+        #     commandLine = f'"{python_executable}" {pyargs} {child_class_initializator}'
 
         logger.info(f'Console starter command:{commandLine}')
 
