@@ -914,11 +914,11 @@ class SpawnPipe(SpawnBase):
                     logger.debug(f"SetNamedPipeHandleState return code: {res}")
                 return
             except pywintypes.error as e:
-                if e.args[0] == winerror.ERROR_FILE_NOT_FOUND:      # 2
-                    logger.debug("no pipe, trying again in a bit later")
-                    time.sleep(0.2)
-                else:
+                if e.args[0] != winerror.ERROR_FILE_NOT_FOUND:      # 2
                     raise
+                logger.debug("no pipe, trying again in a bit later")
+                time.sleep(0.25)
+
 
     def disconnect_from_child(self):
         if self.pipe:
