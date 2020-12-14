@@ -115,7 +115,9 @@ def split_command_line(command_line, escape_char='^'):
                 state = state_doublequote
             elif c.isspace():
                 # Add arg to arg_list if we aren't in the middle of whitespace.
-                if state != state_whitespace:
+                if state == state_whitespace:
+                    None    # Do nothing.
+                else:
                     arg_list.append(arg)
                     arg = ''
                     state = state_whitespace
