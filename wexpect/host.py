@@ -207,16 +207,16 @@ class SpawnBase:
         logger.info(f'Spawn started. location {os.path.abspath(__file__)}')
 
         # If command is an int type then it may represent a file descriptor.
-        if isinstance(command, int):
-            logger.warning(
-                "ExceptionPexpect :'Command is an int type. If this is a file descriptor then maybe"
-                " you want to use fdpexpect.fdspawn which takes an existing file descriptor instead"
-                " of a command string.')")
-            raise ExceptionPexpect(
-                'Command is an int type. If this is a file descriptor then maybe you want to use'
-                ' fdpexpect.fdspawn which takes an existing file descriptor instead of a command '
-                'string.')
         if not isinstance(args, list):
+            if isinstance(command, int):
+                logger.warning(
+                    "ExceptionPexpect :'Command is an int type. If this is a file descriptor then maybe"
+                    " you want to use fdpexpect.fdspawn which takes an existing file descriptor instead"
+                    " of a command string.')")
+                raise ExceptionPexpect(
+                    'Command is an int type. If this is a file descriptor then maybe you want to use'
+                    ' fdpexpect.fdspawn which takes an existing file descriptor instead of a command '
+                    'string.')
             logger.warning("TypeError ('The argument, args, must be a list.')")
             raise TypeError('The argument, args, must be a list.')
 
