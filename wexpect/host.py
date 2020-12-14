@@ -893,6 +893,7 @@ class SpawnPipe(SpawnBase):
 
         pipe_full_path = r'\\.\pipe\{}'.format(self.pipe_file_name)
         print("..................................1.........................\n")
+        print(f"..................................{end_time}.........................\n")
         logger.debug(f'Trying to connect to pipe: {pipe_full_path}')
         while True:
             if end_time < time.time():
