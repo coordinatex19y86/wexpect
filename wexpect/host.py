@@ -886,9 +886,8 @@ class SpawnPipe(SpawnBase):
     def connect_to_child(self, timeout=-1):
         if timeout == -1:
             timeout = self.timeout
-        if timeout is None:
-            end_time = float('inf')
-        else:
+        end_time = float('inf')
+        if timeout:
             end_time = time.time() + timeout
 
         pipe_full_path = r'\\.\pipe\{}'.format(self.pipe_file_name)
